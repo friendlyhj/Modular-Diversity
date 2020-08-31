@@ -1,13 +1,8 @@
 package modulardiversity.components.requirements;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import hellfirepvp.modularmachinery.common.crafting.ComponentType;
 import hellfirepvp.modularmachinery.common.crafting.helper.ComponentRequirement;
 import hellfirepvp.modularmachinery.common.crafting.helper.RecipeCraftingContext;
-import hellfirepvp.modularmachinery.common.crafting.requirement.type.RequirementType;
-import hellfirepvp.modularmachinery.common.lib.RegistriesMM;
-import hellfirepvp.modularmachinery.common.machine.IOType;
 import hellfirepvp.modularmachinery.common.machine.MachineComponent;
 import hellfirepvp.modularmachinery.common.modifier.RecipeModifier;
 import modulardiversity.components.MachineComponents;
@@ -15,30 +10,14 @@ import modulardiversity.jei.JEIComponentEmber;
 import modulardiversity.jei.ingredients.Embers;
 import modulardiversity.util.IResourceToken;
 import modulardiversity.util.Misc;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.List;
 
-public class RequirementEmber extends RequirementConsumeOnce<Embers,RequirementEmber.ResourceToken,RequirementEmber.Type> {
-    static ResourceLocation resourceLocation;
-
-    public static class Type extends RequirementType<Embers,RequirementEmber> {
-
-        @Override
-        public RequirementEmber createRequirement(IOType ioType, JsonObject jsonObject) {
-            if(jsonObject.has("ember") && jsonObject.get("ember").isJsonPrimitive() && jsonObject.get("ember").getAsJsonPrimitive().isNumber()) {
-                float emberRequired = jsonObject.getAsJsonPrimitive("ember").getAsFloat();
-                return new RequirementEmber(ioType, emberRequired);
-            } else {
-                throw new JsonParseException("The ComponentType \'"+getRegistryName()+"\' expects a \'ember\'-entry that defines the required ember!");
-            }
-        }
-    }
-
+public class RequirementEmber extends RequirementConsumeOnce<Embers,RequirementEmber.ResourceToken> {
     public double requiredEmber;
 
-    public RequirementEmber(IOType actionType, double requiredEmber) {
-        super((Type) RegistriesMM.REQUIREMENT_TYPE_REGISTRY.getValue(resourceLocation), actionType);
+    public RequirementEmber(MachineComponent.IOType actionType, double requiredEmber) {
+        super(ComponentType.Registry.getComponent("ember"), actionType);
         this.requiredEmber = requiredEmber;
     }
 
@@ -48,8 +27,8 @@ public class RequirementEmber extends RequirementConsumeOnce<Embers,RequirementE
     }
 
     @Override
-    public ComponentRequirement<Embers,Type> deepCopyModified(List<RecipeModifier> modifiers) {
-        return new RequirementEmber(getActionType(),Misc.applyModifiers(modifiers,getRequirementType(),getActionType(),requiredEmber,false));
+    public ComponentRequirement<Embers> deepCopyModified(List<RecipeModifier> modifiers) {
+        return new RequirementEmber(getActionType(),Misc.applyModifiers(modifiers,"ember",getActionType(),requiredEmber,false));
     }
 
     @Override
@@ -86,8 +65,8 @@ public class RequirementEmber extends RequirementConsumeOnce<Embers,RequirementE
         }
 
         @Override
-        public void applyModifiers(RecipeCraftingContext modifiers, RequirementType type, IOType ioType, float durationMultiplier) {
-            ember = Misc.applyModifiers(modifiers,type,ioType,ember,false);
+        public void applyModifiers(RecipeCraftingContext modifiers, MachineComponent.IOType ioType, float durationMultiplier) {
+            ember = Misc.applyModifiers(modifiers,"ember",ioType,ember,false);
         }
 
         @Override
